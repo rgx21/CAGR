@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CAGR Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      background: #FFFFFF;
+      color: #111111;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* ── Header ── */
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #B45309;
+      background: #FEF3C7;
+      border: 1px solid #F59E0B;
+      padding: 3px 10px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 34px;
+      font-weight: 800;
+      color: #0F0F0F;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 8px;
+    }
+
+    h1 span { color: #D97706; }
+
+    .subtitle {
+      font-size: 14px;
+      color: #6B7280;
+      font-weight: 500;
+      margin-bottom: 40px;
+    }
+
+    /* ── Input rows ── */
+    .input-section {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      margin-bottom: 32px;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 10px; }
+
+    .field-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .field-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .field-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: #F9FAFB;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 8px;
+      overflow: hidden;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .field-input-wrap:focus-within {
+      border-color: #D97706;
+      box-shadow: 0 0 0 3px rgba(217,119,6,0.1);
+    }
+
+    .field-prefix {
+      font-size: 13px;
+      font-weight: 700;
+      color: #9CA3AF;
+      padding: 0 10px 0 12px;
+      user-select: none;
+    }
+
+    .field-suffix {
+      font-size: 13px;
+      font-weight: 700;
+      color: #9CA3AF;
+      padding: 0 12px 0 6px;
+      user-select: none;
+    }
+
+    .field-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #111111;
+      padding: 10px 0;
+      min-width: 0;
+    }
+
+    .field-input::placeholder {
+      color: #C4C9D4;
+      font-weight: 500;
+    }
+
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+
+    /* ── Slider ── */
+    .slider-wrap { position: relative; padding: 4px 0; }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 99px;
+      background: #E5E7EB;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 2px solid #D97706;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+    input[type=range]::-moz-range-thumb {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 2px solid #D97706;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+      cursor: pointer;
+    }
+
+    /* ── Period mode toggle ── */
+    .period-toggle {
+      display: flex;
+      background: #F3F4F6;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 8px;
+      overflow: hidden;
+      height: 38px;
+      width: 120px;
+      flex-shrink: 0;
+    }
+
+    .period-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: #9CA3AF;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .period-btn.active {
+      background: #D97706;
+      color: #FFFFFF;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      height: 2px;
+      background: #F3F4F6;
+      margin-bottom: 28px;
+    }
+
+    /* ── Results ── */
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .result-card {
+      border: 1.5px solid #E5E7EB;
+      border-radius: 12px;
+      padding: 22px 22px 18px;
+      background: #FFFFFF;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      transition: all 0.2s;
+    }
+
+    .result-card.highlight {
+      border-color: #D97706;
+      background: #FFFBEB;
+      box-shadow: 0 4px 20px rgba(217,119,6,0.12);
+    }
+
+    .result-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #9CA3AF;
+      margin-bottom: 10px;
+    }
+
+    .result-card.highlight .result-label { color: #B45309; }
+
+    .result-value {
+      font-size: 36px;
+      font-weight: 800;
+      color: #0F0F0F;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .result-card.highlight .result-value { color: #D97706; }
+
+    .result-empty {
+      color: #E5E7EB;
+      font-weight: 300;
+    }
+
+    .result-sub {
+      margin-top: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #9CA3AF;
+    }
+
+    .result-card.highlight .result-sub { color: #B45309; opacity: 0.7; }
+
+    /* ── Absolute gain card full width ── */
+    .abs-card {
+      border: 1.5px solid #E5E7EB;
+      border-radius: 12px;
+      padding: 18px 22px;
+      background: #FFFFFF;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .abs-left { display: flex; flex-direction: column; gap: 4px; }
+
+    .abs-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #9CA3AF;
+    }
+
+    .abs-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: #0F0F0F;
+      letter-spacing: -0.02em;
+    }
+
+    .abs-value .abs-currency {
+      font-size: 14px;
+      font-weight: 700;
+      color: #9CA3AF;
+      vertical-align: super;
+    }
+
+    .abs-value.positive { color: #059669; }
+    .abs-value.negative { color: #DC2626; }
+
+    .abs-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 99px;
+      background: #F3F4F6;
+      color: #6B7280;
+    }
+
+    .abs-pill.positive { background: #D1FAE5; color: #059669; }
+    .abs-pill.negative { background: #FEE2E2; color: #DC2626; }
+
+    /* ── Reset button ── */
+    .reset-wrap {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .reset-btn {
+      background: transparent;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 8px;
+      color: #9CA3AF;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      padding: 8px 18px;
+      transition: all 0.15s;
+    }
+
+    .reset-btn:hover { background: #F3F4F6; color: #374151; border-color: #D1D5DB; }
+
+    /* ── Responsive ── */
+    @media (max-width: 500px) {
+      h1 { font-size: 26px; }
+      .results-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="badge">Returns Calculator</div>
+  <h1>CAGR <span>Calculator</span></h1>
+  <p class="subtitle">Compute compounded annual growth rate &amp; absolute gains on any investment</p>
+
+  <!-- Inputs -->
+  <div class="input-section">
+
+    <!-- Initial Investment -->
+    <div class="field">
+      <div class="field-top">
+        <label class="field-label">Initial Investment</label>
+        <div class="field-input-wrap" style="width:160px">
+          <span class="field-prefix">₹</span>
+          <input class="field-input" id="initialInput" type="number" placeholder="0" min="0" step="100" />
+        </div>
+      </div>
+      <div class="slider-wrap">
+        <input type="range" id="initialSlider" min="0" max="10000000" step="1000" value="0" />
+      </div>
+    </div>
+
+    <!-- Final Investment -->
+    <div class="field">
+      <div class="field-top">
+        <label class="field-label">Final Investment Value</label>
+        <div class="field-input-wrap" style="width:160px">
+          <span class="field-prefix">₹</span>
+          <input class="field-input" id="finalInput" type="number" placeholder="0" min="0" step="100" />
+        </div>
+      </div>
+      <div class="slider-wrap">
+        <input type="range" id="finalSlider" min="0" max="10000000" step="1000" value="0" />
+      </div>
+    </div>
+
+    <!-- Duration -->
+    <div class="field">
+      <div class="field-top">
+        <label class="field-label">Duration of Investment</label>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="period-toggle">
+            <button class="period-btn active" id="btnYr" data-unit="yr">Yr</button>
+            <button class="period-btn" id="btnMo" data-unit="mo">Mo</button>
+          </div>
+          <div class="field-input-wrap" style="width:100px">
+            <input class="field-input" id="durationInput" type="number" placeholder="0" min="0" step="1" style="padding-left:12px" />
+            <span class="field-suffix" id="durationSuffix">Yr</span>
+          </div>
+        </div>
+      </div>
+      <div class="slider-wrap">
+        <input type="range" id="durationSlider" min="0" max="30" step="1" value="0" />
+      </div>
+    </div>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Results -->
+  <div class="results-grid">
+    <div class="result-card highlight">
+      <div class="result-label">CAGR</div>
+      <div class="result-value" id="cagrValue"><span class="result-empty">—</span></div>
+      <div class="result-sub" id="cagrSub"></div>
+    </div>
+    <div class="result-card">
+      <div class="result-label">Total Value</div>
+      <div class="result-value" id="totalValue"><span class="result-empty">—</span></div>
+      <div class="result-sub" id="totalSub"></div>
+    </div>
+  </div>
+
+  <!-- Absolute gains -->
+  <div class="abs-card">
+    <div class="abs-left">
+      <div class="abs-label">Absolute Gain / Loss</div>
+      <div class="abs-value" id="absValue"><span style="color:#E5E7EB;font-weight:300">—</span></div>
+    </div>
+    <div class="abs-pill" id="absPill">—</div>
+  </div>
+
+  <!-- Reset -->
+  <div class="reset-wrap">
+    <button class="reset-btn" id="resetBtn">↺ Reset</button>
+  </div>
+
+</div>
+
+<script>
+  let unit = "yr"; // "yr" or "mo"
+
+  const initialInput   = document.getElementById("initialInput");
+  const initialSlider  = document.getElementById("initialSlider");
+  const finalInput     = document.getElementById("finalInput");
+  const finalSlider    = document.getElementById("finalSlider");
+  const durationInput  = document.getElementById("durationInput");
+  const durationSlider = document.getElementById("durationSlider");
+  const durationSuffix = document.getElementById("durationSuffix");
+  const btnYr          = document.getElementById("btnYr");
+  const btnMo          = document.getElementById("btnMo");
+
+  const fmt = (n, dec = 2) =>
+    n.toLocaleString("en-IN", { minimumFractionDigits: dec, maximumFractionDigits: dec });
+
+  // ── Sync input ↔ slider ───────────────────────────────────
+  function syncSlider(input, slider) {
+    const v = parseFloat(input.value) || 0;
+    const max = parseFloat(slider.max);
+    slider.value = Math.min(v, max);
+    updateSliderFill(slider);
+  }
+
+  function syncInput(slider, input) {
+    input.value = slider.value == 0 ? "" : slider.value;
+    updateSliderFill(slider);
+    compute();
+  }
+
+  function updateSliderFill(slider) {
+    const pct = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
+    slider.style.background = `linear-gradient(to right, #D97706 ${pct}%, #E5E7EB ${pct}%)`;
+  }
+
+  // Initial
+  initialInput.addEventListener("input", () => { syncSlider(initialInput, initialSlider); compute(); });
+  initialSlider.addEventListener("input", () => syncInput(initialSlider, initialInput));
+
+  // Final
+  finalInput.addEventListener("input", () => { syncSlider(finalInput, finalSlider); compute(); });
+  finalSlider.addEventListener("input", () => syncInput(finalSlider, finalInput));
+
+  // Duration
+  durationInput.addEventListener("input", () => { syncSlider(durationInput, durationSlider); compute(); });
+  durationSlider.addEventListener("input", () => syncInput(durationSlider, durationInput));
+
+  // ── Unit toggle ───────────────────────────────────────────
+  btnYr.addEventListener("click", () => {
+    unit = "yr";
+    btnYr.classList.add("active");
+    btnMo.classList.remove("active");
+    durationSuffix.textContent = "Yr";
+    durationSlider.max = 30;
+    durationInput.value = "";
+    durationSlider.value = 0;
+    updateSliderFill(durationSlider);
+    compute();
+  });
+
+  btnMo.addEventListener("click", () => {
+    unit = "mo";
+    btnMo.classList.add("active");
+    btnYr.classList.remove("active");
+    durationSuffix.textContent = "Mo";
+    durationSlider.max = 360;
+    durationInput.value = "";
+    durationSlider.value = 0;
+    updateSliderFill(durationSlider);
+    compute();
+  });
+
+  // ── Compute ───────────────────────────────────────────────
+  function compute() {
+    const initial  = parseFloat(initialInput.value);
+    const final    = parseFloat(finalInput.value);
+    const duration = parseFloat(durationInput.value);
+
+    const cagrEl    = document.getElementById("cagrValue");
+    const cagrSub   = document.getElementById("cagrSub");
+    const totalEl   = document.getElementById("totalValue");
+    const totalSub  = document.getElementById("totalSub");
+    const absEl     = document.getElementById("absValue");
+    const absPill   = document.getElementById("absPill");
+
+    if (!initial || !final || !duration || initial <= 0 || duration <= 0) {
+      cagrEl.innerHTML   = `<span class="result-empty">—</span>`;
+      cagrSub.textContent = "";
+      totalEl.innerHTML  = `<span class="result-empty">—</span>`;
+      totalSub.textContent = "";
+      absEl.innerHTML    = `<span style="color:#E5E7EB;font-weight:300">—</span>`;
+      absPill.textContent = "—";
+      absPill.className   = "abs-pill";
+      return;
+    }
+
+    // Years
+    const years = unit === "yr" ? duration : duration / 12;
+
+    // CAGR = (Final/Initial)^(1/years) - 1
+    const cagr = (Math.pow(final / initial, 1 / years) - 1) * 100;
+
+    // Absolute gain
+    const absGain = final - initial;
+    const absGainPct = ((final - initial) / initial) * 100;
+    const isPositive = absGain >= 0;
+
+    // CAGR display
+    cagrEl.textContent = `${cagr >= 0 ? "" : ""}${fmt(cagr)}%`;
+    cagrSub.textContent = `over ${fmt(years, years % 1 === 0 ? 0 : 1)} yr${years !== 1 ? "s" : ""}`;
+
+    // Total value
+    totalEl.innerHTML = `<span style="font-size:18px;font-weight:700;color:#9CA3AF;vertical-align:super">₹</span>${fmt(final)}`;
+    totalSub.textContent = `from ₹${fmt(initial)}`;
+
+    // Absolute
+    absEl.className = `abs-value ${isPositive ? "positive" : "negative"}`;
+    absEl.innerHTML = `<span class="abs-currency">${isPositive ? "+" : ""}₹</span>${fmt(Math.abs(absGain))}`;
+
+    absPill.textContent = `${isPositive ? "▲" : "▼"} ${fmt(Math.abs(absGainPct))}%`;
+    absPill.className   = `abs-pill ${isPositive ? "positive" : "negative"}`;
+  }
+
+  // ── Reset ─────────────────────────────────────────────────
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    initialInput.value  = "";
+    finalInput.value    = "";
+    durationInput.value = "";
+    [initialSlider, finalSlider, durationSlider].forEach((s) => {
+      s.value = 0;
+      updateSliderFill(s);
+    });
+    unit = "yr";
+    btnYr.classList.add("active");
+    btnMo.classList.remove("active");
+    durationSuffix.textContent = "Yr";
+    durationSlider.max = 30;
+    compute();
+  });
+
+  // Init slider fills
+  [initialSlider, finalSlider, durationSlider].forEach(updateSliderFill);
+</script>
+</body>
+</html>
